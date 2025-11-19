@@ -1,24 +1,284 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Guess That Fart!</title>
-  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* --- THEATER THEME STYLES --- */
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #0f0505; /* Dark background */
+      color: #e0d0b0; /* Off-white/gold text */
+      font-family: 'Georgia', serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* The red curtains */
+    .curtain {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: 15%;
+      background: repeating-linear-gradient(
+        90deg,
+        #4a0404,
+        #4a0404 10px,
+        #7a0a0a 20px,
+        #2b0202 30px
+      );
+      box-shadow: 0 0 20px rgba(0,0,0,0.8);
+      z-index: 2;
+    }
+    .curtain-left { left: 0; }
+    .curtain-right { right: 0; }
+
+    /* Top Valance (Curtain top) */
+    .valance {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: repeating-linear-gradient(
+        180deg,
+        #4a0404,
+        #4a0404 10px,
+        #7a0a0a 20px,
+        #2b0202 30px
+      );
+      z-index: 3;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+      border-bottom-left-radius: 50% 20px;
+      border-bottom-right-radius: 50% 20px;
+    }
+
+    /* The Movie Screen */
+    .screen-container {
+      position: relative;
+      width: 70%;
+      max-width: 800px;
+      aspect-ratio: 16 / 9;
+      background: #1a1a1a;
+      border: 8px solid #000;
+      border-radius: 4px;
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.1), inset 0 0 50px rgba(0,0,0,0.8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      z-index: 1;
+      padding: 20px;
+    }
+
+    /* Typography & Elements inside the screen */
+    h1 {
+      font-size: 3rem;
+      margin: 0 0 10px 0;
+      color: #f1c40f; /* Gold title */
+      text-shadow: 2px 2px 4px #000;
+      font-family: 'Brush Script MT', cursive;
+    }
+
+    #status {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+      min-height: 1.5em;
+      text-shadow: 1px 1px 2px #000;
+    }
+
+    #score {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      font-size: 1.2rem;
+      color: #f1c40f;
+      border: 1px solid #f1c40f;
+      padding: 5px 10px;
+      border-radius: 5px;
+      background: rgba(0,0,0,0.5);
+    }
+
+    /* Button Styles */
+    .controls {
+      margin: 20px 0;
+      display: flex;
+      gap: 15px;
+    }
+
+    button {
+      background: linear-gradient(to bottom, #3498db, #2980b9);
+      border: 2px solid #85c1e9;
+      color: white;
+      padding: 10px 20px;
+      font-family: 'Georgia', serif;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      border-radius: 4px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      transition: all 0.2s;
+    }
+
+    button:hover {
+      background: linear-gradient(to bottom, #5dade2, #3498db);
+      transform: scale(1.05);
+    }
+
+    button:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+
+    /* Guess Buttons Specifics */
+    #guessButtons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    #guessButtons button {
+      background: linear-gradient(to bottom, #5d6d7e, #34495e);
+      border-color: #aeb6bf;
+      min-width: 100px;
+    }
+    
+    #guessButtons button:hover {
+      background: linear-gradient(to bottom, #85929e, #5d6d7e);
+    }
+
+    h2 {
+      font-size: 1.2rem;
+      color: #bdc3c7;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      border-bottom: 1px solid #bdc3c7;
+      padding-bottom: 5px;
+    }
+  </style>
 </head>
 <body>
 
-  <h1>Guess That Fart!</h1>
+  <!-- Decorative Curtain Elements -->
+  <div class="valance"></div>
+  <div class="curtain curtain-left"></div>
+  <div class="curtain curtain-right"></div>
 
-  <p id="status">Press start to hear a fart.</p>
-  <p id="score">Score: 0</p>
+  <!-- Main Game Screen -->
+  <div class="screen-container">
+    <h1>Guess That Fart!</h1>
+    <div id="score">Score: 0</div>
 
-  <button id="startBtn">Start Game</button>
-  <button id="playBtn">Play Fart Sound</button>
+    <p id="status">Press start to begin the show.</p>
 
-  <h2>Make Your Guess</h2>
-  <div id="guessButtons"></div>
+    <div class="controls">
+      <button id="startBtn">Start Game</button>
+      <button id="playBtn">Play Sound</button>
+    </div>
 
-  <script type="module" src="./dist/main.js"></script>
+    <div>
+      <h2>Make Your Guess</h2>
+      <div id="guessButtons"></div>
+    </div>
+  </div>
+
+  <script>
+    // Simple list of fart types
+    const fartSounds = ["grandma", "elephant", "machine", "alien"];
+
+    // Game state variables
+    let currentFart = null;
+    let score = 0;
+    let isPlaying = false;
+
+    // DOM elements
+    const statusEl = document.getElementById("status");
+    const scoreEl = document.getElementById("score");
+    const startBtn = document.getElementById("startBtn");
+    const playBtn = document.getElementById("playBtn");
+    const guessButtonsContainer = document.getElementById("guessButtons");
+
+    // Update status message
+    function updateStatus(message) {
+      statusEl.textContent = message;
+    }
+
+    // Update score display
+    function updateScore() {
+      scoreEl.textContent = `Score: ${score}`;
+    }
+
+    // Pick a random fart sound for the round
+    function pickRandomFart() {
+      const index = Math.floor(Math.random() * fartSounds.length);
+      currentFart = fartSounds[index];
+      console.log("Selected fart:", currentFart);
+    }
+
+    // "Play" the fart sound (placeholder)
+    function playFartSound() {
+      if (!isPlaying) {
+        updateStatus("Press 'Start Game' first!");
+        return;
+      }
+      if (!currentFart) {
+        pickRandomFart();
+      }
+      // Placeholder for sound playing
+      console.log("Playing fart sound:", currentFart);
+      updateStatus("Sound played! Make your guess.");
+    }
+
+    // Start the game
+    function startGame() {
+      isPlaying = true;
+      score = 0;
+      updateScore();
+      updateStatus("Game started! Listen closely...");
+      pickRandomFart();
+      // Automatically "play" sound shortly after starting
+      setTimeout(playFartSound, 500);
+    }
+
+    // Handle player's guess
+    function makeGuess(guess) {
+      if (!isPlaying) {
+        updateStatus("Press 'Start Game' to play!");
+        return;
+      }
+      if (guess === currentFart) {
+        score++;
+        updateScore();
+        updateStatus("Correct! 🎉 Next round starting...");
+        pickRandomFart();
+        setTimeout(playFartSound, 1000);
+      } else {
+        updateStatus(`Wrong! It was ${currentFart}. Try again!`);
+      }
+    }
+
+    // Create guess buttons
+    fartSounds.forEach(fart => {
+      const btn = document.createElement("button");
+      btn.textContent = fart.toUpperCase();
+      btn.addEventListener("click", () => makeGuess(fart));
+      guessButtonsContainer.appendChild(btn);
+    });
+
+    // Event listeners for control buttons
+    startBtn.addEventListener("click", startGame);
+    playBtn.addEventListener("click", playFartSound);
+  </script>
 </body>
 </html>
